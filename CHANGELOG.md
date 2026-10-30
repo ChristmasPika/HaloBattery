@@ -6,6 +6,10 @@ and the project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- Razer BlackShark V3 on its 2.4 GHz dongle (`1532:057A`, [#292](https://github.com/HeyOkay/HaloBattery/issues/292)): level and charging from the dongle's `ff14:0001` collection. The headset's radio link resets when it is polled all the time, so the collection stays open, the app listens to what the headset pushes, and it only asks at connect, after a link-up push and after 5 silent minutes; a switched-off headset can therefore stay on screen for up to 5 minutes. **Unverified on hardware** - the frames come from OpenRazer's open pull request #2794 and a Synapse capture of this dongle.
+- ATK / VXE mice on the NearLink `NK mouse NANO dongle` (`373B:1216`, [#291](https://github.com/HeyOkay/HaloBattery/issues/291)), such as the VXE R1: level and charging over the receiver's `ff05:0001` collection, with the protocol of ATK's own configurator. The receiver is shared between models, so the icon says "ATK VXE NK mouse". **Unverified on hardware** by this project - the request and reply come from `@openmouse/protocol` and a capture of this receiver id in atk-tool's pull request #15.
+
 ### Changed
 - **A tidier repository and a shorter README**: the app's modules moved into the `halo/`
   package (`halo_battery.pyw` stays the entry point), the .bat helpers into `scripts/`

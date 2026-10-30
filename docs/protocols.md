@@ -106,6 +106,12 @@ On battery and after charge completion, it displays the reported level unchanged
 
 The headset's own "PA" protocol: output reports 0x02 on the vendor interface 0xFF00, remote mode 0xE1, commands 0x21 (battery) and 0x2A (charging)
 
+### Razer BlackShark V3
+
+**Connection:** 2.4 GHz dongle (1532:057A)
+
+64-byte frames, report id 0x02, on the vendor collection `ff14:0001`: transaction id 0x60 in byte 2, direction 0x80 in byte 9, class in byte 10 (0x21 battery, 0x2A charging), and the XOR of bytes 0-61 in byte 62. The answer is an input report on the same collection with the value in byte 13, where 0xFF means the radio link is not up yet. Three wake frames go out once per connection, in the order Synapse sends them. From [OpenRazer pull request #2794](https://github.com/openrazer/openrazer/pull/2794), not merged yet, and a Synapse capture of this dongle that its author posted in [#292](https://github.com/HeyOkay/HaloBattery/issues/292). Polling every 2 s reset the headset's radio link on OpenRazer, so the collection stays open between polls and the app reads what the headset pushes; it asks only at connect, after a link-up push (class 0x20) and after 5 silent minutes. A switched-off headset can therefore stay on screen for up to 5 minutes. **Unverified on hardware** here
+
 ### SteelSeries Arctis and GameBuds (other models)
 
 **Connection:** wireless base station or dongle
@@ -138,7 +144,12 @@ The same `b0` exchange as the other Nova headsets, asked for with report id `06`
 
 The AJAZZ Control Center project's AJ-series exchange: a zero-payload `0xF7` status poll brings the receiver's 2.4G telemetry up, then the charge reads from status report `0x05` (`05 00 00 64 01 01 01 02`, charge at byte 3 on Windows). A zero charge or junk bytes are shown as no level rather than a wrong value, and no charging state is reported. **Unverified** - no AM Infinity was on hand; the exchange is confirmed on the reference project's own unit, so the layout stands until the reporter of #72 confirms it
 
-### ASUS ROG Gladius III Aimpoint and other ROG / TUF wireless mice
+### ATK / VXE NearLink mice on the NK NANO dongle
+
+**Connection:** 2.4 GHz dongle (373B:1216)
+
+This receiver has no `ff02:0002` collection, so the Pulsar / ATK / VXE frames do not apply. It speaks the protocol [`@openmouse/protocol`](https://github.com/OpenMouse-Project/mouse-protocol) calls BITMOUSE, taken from ATK's own configurator, on `ff05:0001`: report id 0x08, 63 bytes, a sum checksum first, then the marker 0x72, the request length, a sequence byte, target 1 (the mouse behind the receiver), the command and the reply length. Command 7 is the level and command 15 the charging state, each in the first payload byte of a reply laid out `72 <status> <sequence> <target> <command> <length> <payload>`. [atk-tool pull request #15](https://github.com/noosxe/atk-tool/pull/15) (closed for its size, not merged) tested this id and captured the battery exchange, which fits that layout; the byte it reads as charging is the sequence byte and its voltage sits behind the payload, where OpenMouse says old bytes remain, so neither is used. A level of 0 is refused, because no source says what the receiver answers for a sleeping mouse. Several models share this receiver, so the icon does not name one. **Unverified on hardware** here
+
 
 **Connection:** 2.4 GHz receiver or USB cable (for example 0B05:1A72)
 
