@@ -81,7 +81,10 @@ class FakeDongle:
             def read(self, n, timeout=0):
                 if dongle.fail:
                     raise dongle.fail
-                dongle.now += timeout / 1000 or 0.001
+                # hidapi's read() with no timeout waits until a report comes, which on a
+                # quiet headset is forever: it froze the whole app, so no icon appeared
+                assert timeout > 0 or dongle.inbox, "read() without a timeout would hang"
+                dongle.now += timeout / 1000
                 return dongle.inbox.pop(0) if dongle.inbox else []
 
             def close(self):

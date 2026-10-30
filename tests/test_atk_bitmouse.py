@@ -62,6 +62,8 @@ class FakeReceiver:
                 return len(frame)
 
             def read(self, n, timeout=0):
+                # hidapi's read() with no timeout waits until a report comes
+                assert timeout > 0 or rx.pending, "read() without a timeout would hang"
                 return rx.pending.pop(0) if rx.pending else []
 
             def close(self):

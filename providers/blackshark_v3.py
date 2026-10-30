@@ -79,6 +79,7 @@ LINK_SETTLE_S = 0.6     # after a link-up push, before the first query
 WAKE_WAIT_S = 0.05      # the capture shows the answer to a wake frame within 4 ms
 REPLY_WAIT_S = 0.3      # the capture shows the battery reply after about 50 ms
 READ_TIMEOUT_MS = 50
+BUFFERED_TIMEOUT_MS = 1 # never 0: hidapi's read() takes that as "wait until a report comes"
 MAX_BUFFERED = 128      # reports taken per poll; hidapi asks Windows to hold 64
 
 
@@ -196,7 +197,7 @@ class Session:
         """-> (level, charging); the level is None while the headset gives none.
         OSError or ValueError means the handle is dead: close it and open a new one."""
         for _ in range(MAX_BUFFERED):
-            data = self.dev.read(REPORT_LEN, 0)
+            data = self.dev.read(REPORT_LEN, BUFFERED_TIMEOUT_MS)
             if not data:
                 break
             self._handle(data, diag)
